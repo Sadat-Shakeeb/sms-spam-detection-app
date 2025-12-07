@@ -3,9 +3,34 @@ import pickle
 import string
 from nltk.corpus import stopwords
 import nltk
+import nltk
+nltk.download('punkt')
 from nltk.stem.porter import PorterStemmer
 
 ps = PorterStemmer()
+import nltk
+
+def ensure_nltk_resources():
+    # punkt
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt')
+
+    # punkt_tab (required by newer NLTK for sentence tokenization)
+    try:
+        nltk.data.find('tokenizers/punkt_tab')
+    except LookupError:
+        nltk.download('punkt_tab')
+
+    # stopwords (if you use them)
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords')
+
+
+ensure_nltk_resources()
 
 
 def transform_text(text):
@@ -39,16 +64,24 @@ st.title("Email/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message")
 
-if st.button('Predict'):
+if st.button("Predict"):
 
-    # 1. preprocess
     transformed_sms = transform_text(input_sms)
-    # 2. vectorize
     vector_input = tfidf.transform([transformed_sms])
-    # 3. predict
     result = model.predict(vector_input)[0]
-    # 4. Display
+
     if result == 1:
-        st.header("Spam")
+        st.markdown("""
+        <div style="background:#ffebee; padding:18px; border-radius:10px; border-left:5px solid #c62828;">
+            <h3 style="color:#b71c1c;">Spam Detected</h3>
+            The message appears suspicious.
+        </div>
+        """, unsafe_allow_html=True)
+
     else:
-        st.header("Not Spam")
+        st.markdown("""
+        <div style="background:#e8f5e9; padding:18px; border-radius:10px; border-left:5px solid #2e7d32;">
+            <h3 style="color:#1b5e20;">Not Spam</h3>
+            The message looks safe.
+        </div>
+        """, unsafe_allow_html=True)
